@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         看过动画自动标记音乐
 // @namespace    https://astrack.me/
-// @version      0.2.0
+// @version      0.2.1
 // @description  看过动画自动标记音乐
 // @author       astrack
 // @include      /^http(s)?://(bgm.tv|bangumi.tv|chii.in)/*/
@@ -18,31 +18,32 @@ function isMusic(element) {
 
 async function handleFormSubmit(event) {
   event.preventDefault();
+  event.stopPropagation();
 
   const form = document.querySelector("#collectBoxForm");
   if (!form) return;
 
   submitTip();
+  if ($("#collect").is(":checked")) {
+    let subjectDocument = document;
+    const subjectId = window.location.pathname.split("/")[2];
 
-  let subjectDocument = document;
-  const subjectId = window.location.pathname.split("/")[2];
-
-  if (!document.getElementById("bangumiInfo")) {
-    try {
-      const response = await fetch(`/subject/${subjectId}`);
-      if (!response.ok) throw new Error("Failed to fetch subject document");
-      subjectDocument = new DOMParser().parseFromString(
-        await response.text(),
-        "text/html",
-      );
-    } catch (error) {
-      console.error("Error loading subject document:", error);
-      return;
+    if (!document.getElementById("bangumiInfo")) {
+      2;
+      try {
+        const response = await fetch(`/subject/${subjectId}`);
+        if (!response.ok) throw new Error("Failed to fetch subject document");
+        subjectDocument = new DOMParser().parseFromString(
+          await response.text(),
+          "text/html",
+        );
+      } catch (error) {
+        console.error("Error loading subject document:", error);
+        return;
+      }
     }
+    await collectMusic(subjectDocument);
   }
-
-  await collectMusic(subjectDocument);
-
   const actionUrl = form.getAttribute("action");
   const formData = new URLSearchParams(new FormData(form)).toString();
   await fetch(actionUrl, {
